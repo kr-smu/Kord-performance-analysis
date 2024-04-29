@@ -31,3 +31,6 @@ This repository contains tools for analyzing the performance of the Kord API, sp
 - The ex_joints_changes file shows the specific modifications made to the example code for timing analysis.
 - The ex_move_direct file provides an example for analyzing the timing of direct joint control movement.
 - The analysis process can be applied to other Kord API functions and examples to gain a comprehensive understanding of performance.
+
+![Zoomed out plot](image-1.png)
+![Zoomed in plot ](image.png)
