@@ -22,7 +22,7 @@ This repository contains tools for analyzing the performance of the Kord API, sp
 
 **Data Collection:** Run the modified example code to collect timing data for each iteration of the control loop. This data is saved to a CSV file (stats_file_kord_api.csv).
 
-**Visualization:** Use the diff_api.py script to plot the timing differences between the recorded timestamps. This helps visualize the time taken by each operation and identify potential bottlenecks or inconsistencies.
+**Visualization:** Import the CSV data into your preferred data analysis tool (e.g., Excel, MATLAB, Python with pandas and matplotlib).
 
 **Analysis:** Analyze the timing data and visualizations to understand the performance characteristics of the Kord API and its impact on real-time control. This information can be used to optimize control loops and improve the overall performance of robot applications.
 
@@ -34,3 +34,9 @@ This repository contains tools for analyzing the performance of the Kord API, sp
 
 ![Zoomed out plot](image-1.png)
 ![Zoomed in plot ](image.png)
+
+| Domain | Stamp |Mean [µs] | Median [µs] | Standard deviation [µs] | Maximum [µs] | Minimum [µs] |
+|---|---|---|---|---|---|---|
+| Joints | after_wait_sync | 4000.029 | 3999.934 | 11.973 | 4186.266 | 3768.783
+| Linear | after_wait_sync | 4000.024 | 3999.927 | 12.603 | 4209.904 | 3819.071
+| Direct | after_wait_sync | 4000.030 | 3999.987 | 9.126 | 4167.625 | 3781.044
