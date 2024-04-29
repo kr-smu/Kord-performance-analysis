@@ -1,0 +1,107 @@
+diff --git a/examples/ex_move_joints.cpp b/examples/ex_move_joints.cpp
+index 85871fc..f09f89e 100644
+--- a/examples/ex_move_joints.cpp
++++ b/examples/ex_move_joints.cpp
+@@ -22,6 +22,8 @@
+ #include <kr2/kord/system/SystemAlarm.h>
+ #include <kr2/kord/system/RobotControllerFlags.h>
+ 
++#include <fstream>
++
+ using namespace kr2;
+ static bool g_run = true;
+ 
+@@ -30,8 +32,42 @@ void signal_handler( int a_signum ) {
+     g_run = false;
+ }
+ 
++void saveToCSV(const std::vector<int64_t>& values, const std::vector<std::string>& columnNames, const std::string& filename) {
++    const int columns_number = columnNames.size();
++    std::ofstream outputFile(filename);
++    if (outputFile.is_open()) {
++        // Write column names
++        for (size_t i = 0; i < columnNames.size(); ++i) {
++            outputFile << columnNames[i];
++            if (i != columnNames.size() - 1) {
++                outputFile << ",";
++            }
++        }
++        outputFile << "\n";
++        for (size_t i = 0; i < values.size(); i += columns_number) {
++            for (size_t j = i; j < i + columns_number && j < values.size(); ++j) {
++                outputFile << values[j];
++                if (j != i + (columns_number - 1) && j != values.size() - 1) {
++                    outputFile << ",";
++                }
++            }
++            outputFile << "\n";
++        }
++        outputFile.close();
++        std::cout << "Values have been saved to " << filename << "\n";
++    } else {
++        std::cerr << "Unable to open the file\n";
++    }
++}
++
++std::vector<int64_t> stats_values_;
++
+ int main(int argc, char * argv[])
+ {
++
++    stats_values_.clear();
++    stats_values_.reserve(10000000); // for 5 minutes at least
++
+     kr2::utils::LaunchParameters lp = kr2::utils::LaunchParameters::processLaunchArguments(argc, argv);
+ 
+     if (lp.help_ || !lp.valid_) {
+@@ -122,17 +158,39 @@ int main(int argc, char * argv[])
+         //kord->spin();
+         // std::this_thread::sleep_for(std::chrono::milliseconds(5)); // the time here changes!
+ 
++        { // before waitSync
++            auto now_ts = std::chrono::time_point_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now());
++            stats_values_.push_back((now_ts.time_since_epoch().count()));
++        }
++
++
+         if (!kord->waitSync(std::chrono::milliseconds(10))){
+             std::cout << "Sync wait timed out, exit \n";
+             break;
+         }
+ 
++        { // after waitSync
++           auto now_ts = std::chrono::time_point_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now());
++            stats_values_.push_back((now_ts.time_since_epoch().count()));
++        }
++
+         ctl_iface.moveJ(q,
+                         kr2::kord::TrackingType::TT_TIME,    tt_value,
+                         kr2::kord::BlendType::BT_TIME,       bt_value,
+                         kr2::kord::OverlayType::OT_VIAPOINT);
+ 
++        { // after moveJ
++           auto now_ts = std::chrono::time_point_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now());
++            stats_values_.push_back((now_ts.time_since_epoch().count()));
++        }
++
+         rcv_iface.fetchData();
++
++        { // after fetchData
++           auto now_ts = std::chrono::time_point_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now());
++            stats_values_.push_back((now_ts.time_since_epoch().count()));
++        }
++
+         if (rcv_iface.systemAlarmState() ||
+             lp.runtimeElapsed())
+         {
+@@ -171,5 +229,10 @@ int main(int argc, char * argv[])
+     std::cout << "RCState: " << rcv_iface.getRobotSafetyFlags() << "\n";
+ 
+     kord->printStats(rcv_iface.getStatisticsStructure());
++
++    std::string filePath = "./stats_file_kord_api.csv";
++    std::vector<std::string> columnNames = { "before_wait_sync", "after_wait_sync", "after_movej", "after_fetch_data"};
++    saveToCSV(stats_values_, columnNames, filePath);
++
+     return 0;
+ }
