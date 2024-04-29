@@ -15,7 +15,7 @@ This repository contains tools for analyzing the performance of the Kord API, sp
 
 **Analysis Process:**
 
-**Modifications to Example Code:** The example code files (ex_move_linear.txt and ex_move_joints.txt) are modified to include:
+**Modifications to Example Code:** The example code files (ex_move_linear and ex_move_joints) are modified to include:
 
 - Pre-allocation of arrays for efficiency.
 - Recording of raw timestamps before and after key operations (waitSync, moveJ/moveL, fetchData).
